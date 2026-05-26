@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Tarifas — NeoPark{% endblock %}
+{% block content %}
+<div class="page-header"><h1>💰 Gestión de Tarifas</h1></div>
+<div class="card" style="max-width:500px">
+  <h3>Nueva tarifa</h3>
+  <form method="post">
+    <div class="form-group">
+      <label>Tipo de vehículo</label>
+      <select name="id_tipo" required>
+        {% for t in tipos %}<option value="{{ t.id_tipo }}">{{ t.nombre_tipo }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Valor por hora ($)</label><input type="number" name="valor_por_hora" min="0" required></div>
+      <div class="form-group"><label>Fecha vigencia</label><input type="date" name="fecha_vigencia" required></div>
+    </div>
+    <button class="btn btn-success">Registrar tarifa</button>
+  </form>
+</div>
+<div class="card">
+  <h3>Historial de tarifas</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>ID</th><th>Tipo</th><th>Valor/hora</th><th>Fracción (min)</th><th>Vigente desde</th><th>Activo</th></tr></thead>
+    <tbody>
+      {% for t in tarifas %}
+      <tr>
+        <td>{{ t.id_tarifa }}</td>
+        <td>{{ t.nombre_tipo }}</td>
+        <td>${{ "{:,.0f}".format(t.valor_por_hora) }}</td>
+        <td>{{ t.fraccion_minutos }} min</td>
+        <td>{{ t.fecha_vigencia }}</td>
+        <td>{{ '✓' if t.activo else '✗' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

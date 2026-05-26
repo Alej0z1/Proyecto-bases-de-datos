@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Espacios — NeoPark{% endblock %}
+{% block page_title %}Espacios{% endblock %}
+{% block breadcrumb %}Disponibilidad en tiempo real{% endblock %}
+{% block content %}
+
+<!-- Resumen rápido -->
+<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
+  {% set total_esp = espacios|length %}
+  {% set libres_esp = espacios|selectattr('disponible','equalto',1)|list|length %}
+  <div class="stat-card"><div class="s-icon">🅿</div><div class="s-num">{{ total_esp }}</div><div class="s-lbl">Total</div></div>
+  <div class="stat-card green"><div class="s-icon">✓</div><div class="s-num">{{ libres_esp }}</div><div class="s-lbl">Libres</div></div>
+  <div class="stat-card red"><div class="s-icon">✗</div><div class="s-num">{{ total_esp - libres_esp }}</div><div class="s-lbl">Ocupados</div></div>
+</div>
+
+{% for tipo, icono in [('Carro','🚗'),('Moto','🏍'),('Bicicleta','🚲')] %}
+{% set espacios_tipo = espacios|selectattr('nombre_tipo','equalto',tipo)|list %}
+{% if espacios_tipo %}
+<div class="card">
+  <div class="card-hdr">
+    <h3>{{ icono }} {{ tipo }}s</h3>
+    <span style="font-size:.78rem;color:var(--muted)">
+      {{ espacios_tipo|selectattr('disponible','equalto',1)|list|length }} libres
+      / {{ espacios_tipo|length }} total
+    </span>
+  </div>
+  <div class="esp-grid">
+    {% for e in espacios_tipo %}
+    <div class="esp-cell {{ 'libre' if e.disponible else 'ocupado' }}">
+      <div class="cod">{{ e.codigo }}</div>
+      <div style="font-size:.65rem;margin-top:.1rem">{{ 'Libre' if e.disponible else 'Ocupado' }}</div>
+      {% if not e.disponible and e.placa %}
+      <div style="font-size:.62rem;opacity:.7;margin-top:.1rem">{{ e.placa }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<div style="display:flex;gap:1.2rem;font-size:.82rem;margin-top:.3rem;align-items:center">
+  <span style="display:flex;align-items:center;gap:.35rem;color:var(--green);font-weight:600">
+    <span style="width:10px;height:10px;background:#A7F3D0;border:1.5px solid var(--green);border-radius:3px;display:inline-block"></span>Libre
+  </span>
+  <span style="display:flex;align-items:center;gap:.35rem;color:var(--red);font-weight:600">
+    <span style="width:10px;height:10px;background:#FECACA;border:1.5px solid var(--red);border-radius:3px;display:inline-block"></span>Ocupado
+  </span>
+  <span style="color:var(--muted);font-size:.75rem;margin-left:auto">Se actualiza al recargar la página</span>
+</div>
+{% endblock %}

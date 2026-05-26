@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Mi Perfil — NeoPark{% endblock %}
+{% block page_title %}Mi Perfil{% endblock %}
+{% block breadcrumb %}Cuenta / Perfil{% endblock %}
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem">
+<div>
+<div class="card">
+  <div class="card-hdr"><h3>👤 Información personal</h3></div>
+  <div style="display:flex;flex-direction:column;gap:.6rem;font-size:.88rem">
+    <div class="ticket-row"><span class="label">Nombre</span><span class="value">{{ usuario.nombre }} {{ usuario.apellido }}</span></div>
+    <div class="ticket-row"><span class="label">Correo</span><span class="value">{{ usuario.correo }}</span></div>
+    <div class="ticket-row"><span class="label">Rol</span><span class="value"><span class="badge badge-{{ usuario.nombre_rol.lower() }}">{{ usuario.nombre_rol }}</span></span></div>
+    <div class="ticket-row"><span class="label">Miembro desde</span><span class="value">{{ usuario.fecha_registro[:10] }}</span></div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-hdr"><h3>🚗 Mis vehículos</h3></div>
+  {% for v in mis_vehiculos %}
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid #f1f5f9">
+    <div><strong>{{ v.placa }}</strong> <span style="color:#94a3b8;font-size:.82rem">{{ v.marca or '' }} {{ v.modelo or '' }}</span></div>
+    <span class="badge b-libre">{{ v.nombre_tipo }}</span>
+  </div>
+  {% else %}
+  <p style="color:#94a3b8;font-size:.85rem">No tienes vehículos registrados. <a href="{{ url_for('vehiculos') }}">Registrar uno →</a></p>
+  {% endfor %}
+</div>
+</div>
+<div class="card">
+  <div class="card-hdr"><h3>🔑 Cambiar contraseña</h3></div>
+  <form method="post">
+    <div class="form-group"><label>Contraseña actual</label><input type="password" name="contrasena_actual" required></div>
+    <div class="form-group"><label>Nueva contraseña</label><input type="password" name="contrasena_nueva" required minlength="6"></div>
+    <div class="form-group"><label>Confirmar nueva contraseña</label><input type="password" name="confirmar" required></div>
+    <button class="btn btn-primary" type="submit">Actualizar contraseña</button>
+  </form>
+</div>
+</div>
+{% endblock %}

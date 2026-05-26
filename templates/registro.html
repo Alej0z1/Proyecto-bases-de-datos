@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NeoPark ECCI — Crear cuenta</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;min-height:100vh;background:linear-gradient(160deg,#0A0F1E,#1E2A3A);display:flex;align-items:center;justify-content:center;padding:2rem}
+.box{background:#F7F5F0;border-radius:16px;padding:2.4rem;width:100%;max-width:460px;box-shadow:0 24px 64px rgba(0,0,0,.35)}
+h1{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:#0A0F1E;margin-bottom:.25rem}
+.sub{color:#6B7280;font-size:.87rem;margin-bottom:1.8rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.field{margin-bottom:1rem}
+label{display:block;font-size:.74rem;font-weight:600;color:#374151;margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.04em}
+input{width:100%;padding:.65rem .9rem;border:1.5px solid #E5E7EB;border-radius:9px;font-size:.9rem;font-family:'DM Sans',sans-serif;color:#1F2937;transition:border .2s}
+input:focus{outline:none;border-color:#C9922A;box-shadow:0 0 0 3px rgba(201,146,42,.1)}
+.btn{width:100%;padding:.78rem;border:none;border-radius:9px;background:#0A0F1E;color:#fff;font-family:'Syne',sans-serif;font-size:.93rem;font-weight:700;cursor:pointer;margin-top:.4rem;transition:background .2s}
+.btn:hover{background:#1E2A3A}
+.alert{padding:.7rem 1rem;border-radius:9px;font-size:.84rem;margin-bottom:1rem;border-left:4px solid}
+.alert-danger{background:#FEF2F2;color:#991B1B;border-color:#DC2626}
+.alert-success{background:#F0FDF4;color:#166534;border-color:#059669}
+.back{text-align:center;margin-top:1.1rem;font-size:.85rem;color:#6B7280}
+.back a{color:#C9922A;font-weight:500;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>Crear cuenta</h1>
+  <p class="sub">Usa tu correo institucional @ecci.edu.co</p>
+  {% with msgs=get_flashed_messages(with_categories=true) %}
+    {% for cat,msg in msgs %}<div class="alert alert-{{cat}}">{{msg}}</div>{% endfor %}
+  {% endwith %}
+  <form method="post">
+    <div class="form-row">
+      <div class="field"><label>Nombre</label><input name="nombre" required></div>
+      <div class="field"><label>Apellido</label><input name="apellido" required></div>
+    </div>
+    <div class="field"><label>Correo institucional</label><input type="email" name="correo" placeholder="usuario@ecci.edu.co" required></div>
+    <div class="form-row">
+      <div class="field"><label>Contraseña</label><input type="password" name="contrasena" required minlength="6"></div>
+      <div class="field"><label>Confirmar</label><input type="password" name="confirmar" required></div>
+    </div>
+    <button class="btn">Crear cuenta →</button>
+  </form>
+  <div class="back">¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Iniciar sesión</a></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Auditoría — NeoPark{% endblock %}
+{% block page_title %}Log de Auditoría{% endblock %}
+{% block breadcrumb %}Administración / Auditoría{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-hdr">
+    <h3>🔒 Registro de acciones del sistema</h3>
+    <span style="font-size:.8rem;color:#94a3b8">Últimas {{ logs|length }} acciones</span>
+  </div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>#</th><th>Fecha/Hora</th><th>Usuario</th><th>Acción</th><th>Detalle</th><th>IP</th></tr></thead>
+    <tbody>
+      {% for l in logs %}
+      <tr>
+        <td style="color:#94a3b8">{{ l.id_auditoria }}</td>
+        <td style="white-space:nowrap">{{ l.fecha_hora }}</td>
+        <td>
+          <strong>{{ l.usuario_nombre }}</strong>
+          <span style="display:block;font-size:.75rem;color:#94a3b8">{{ l.correo }}</span>
+        </td>
+        <td>
+          <span class="badge
+            {% if 'LOGIN' in l.accion %}badge-abierto
+            {% elif 'CHECKIN' in l.accion %}badge-libre
+            {% elif 'CHECKOUT' in l.accion %}badge-ocupado
+            {% elif 'EXPORTAR' in l.accion %}badge-supervisor
+            {% else %}badge-cerrado{% endif %}">
+            {{ l.accion }}
+          </span>
+        </td>
+        <td style="font-size:.82rem;color:#64748b">{{ l.detalle or '—' }}</td>
+        <td style="font-family:monospace;font-size:.78rem;color:#94a3b8">{{ l.ip or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

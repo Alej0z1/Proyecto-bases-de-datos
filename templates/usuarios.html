@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Usuarios — NeoPark{% endblock %}
+{% block page_title %}Usuarios{% endblock %}
+{% block breadcrumb %}Administración / Usuarios{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-hdr">
+    <h3>👥 Usuarios del sistema</h3>
+    <span style="font-size:.78rem;color:var(--muted)">{{ usuarios|length }} usuarios</span>
+  </div>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>ID</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Registro</th><th>Acciones</th></tr></thead>
+    <tbody>
+      {% for u in usuarios %}
+      <tr>
+        <td style="color:var(--muted)">{{ u.id_usuario }}</td>
+        <td><strong>{{ u.nombre }} {{ u.apellido }}</strong></td>
+        <td style="font-size:.82rem">{{ u.correo }}</td>
+        <td>
+          {% if u.id_usuario != session.user_id %}
+          <form method="post" action="{{ url_for('editar_usuario', uid=u.id_usuario) }}" style="display:flex;align-items:center;gap:.4rem">
+            <select name="id_rol" style="padding:.25rem .5rem;font-size:.78rem;border:1px solid var(--border);border-radius:6px;background:#fff">
+              {% for r in roles %}
+              <option value="{{ r.id_rol }}" {% if r.id_rol == u.id_rol %}selected{% endif %}>{{ r.nombre_rol }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-ghost btn-sm" type="submit">✓</button>
+          </form>
+          {% else %}
+          <span class="badge b-{{ u.nombre_rol.lower() }}">{{ u.nombre_rol }}</span>
+          {% endif %}
+        </td>
+        <td><span class="badge {% if u.activo %}b-libre{% else %}b-cerrado{% endif %}">{{ 'Activo' if u.activo else 'Inactivo' }}</span></td>
+        <td style="font-size:.78rem;color:var(--muted)">{{ u.fecha_registro[:10] }}</td>
+        <td>
+          {% if u.id_usuario != session.user_id %}
+          <a href="{{ url_for('toggle_usuario', uid=u.id_usuario) }}"
+             class="btn btn-sm {% if u.activo %}btn-ghost{% else %}btn-success{% endif %}"
+             onclick="return confirm('¿Confirmar?')">
+            {{ '🔒 Desactivar' if u.activo else '✓ Activar' }}
+          </a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

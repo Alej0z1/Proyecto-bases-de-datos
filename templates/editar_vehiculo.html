@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Editar Vehículo — NeoPark{% endblock %}
+{% block page_title %}Editar Vehículo{% endblock %}
+{% block breadcrumb %}Vehículos / {{ veh.placa }}{% endblock %}
+{% block content %}
+<div class="card" style="max-width:480px">
+  <div class="card-hdr"><h3>✏ Editar — {{ veh.placa }}</h3></div>
+  <form method="post">
+    <div class="form-group">
+      <label>Tipo de vehículo</label>
+      <select name="id_tipo" required>
+        {% for t in tipos %}
+        <option value="{{ t.id_tipo }}" {% if t.id_tipo == veh.id_tipo %}selected{% endif %}>{{ t.nombre_tipo }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Marca</label><input name="marca" value="{{ veh.marca or '' }}"></div>
+      <div class="form-group"><label>Modelo</label><input name="modelo" value="{{ veh.modelo or '' }}"></div>
+    </div>
+    <div class="form-group"><label>Color</label><input name="color" value="{{ veh.color or '' }}"></div>
+    <div style="display:flex;gap:.7rem;margin-top:.4rem">
+      <button class="btn btn-gold" type="submit">Guardar cambios</button>
+      <a href="{{ url_for('vehiculos') }}" class="btn btn-ghost">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

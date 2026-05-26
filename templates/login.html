@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NeoPark ECCI — Acceso</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0A0F1E;--paper:#F7F5F0;--gold:#C9922A;--gold-lt:#F5C96A;
+  --slate:#1E2A3A;--mist:#E8E4DD;--accent:#2563EB;
+}
+body{
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;display:grid;grid-template-columns:1fr 1fr;
+  background:var(--ink);
+}
+
+/* ── PANEL IZQUIERDO ── */
+.left{
+  position:relative;overflow:hidden;
+  background:linear-gradient(160deg,#0A0F1E 0%,#1E2A3A 60%,#0f1f35 100%);
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:3rem;
+}
+.left::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 30% 40%,rgba(201,146,42,.12) 0%,transparent 70%),
+             radial-gradient(ellipse 50% 50% at 80% 80%,rgba(37,99,235,.08) 0%,transparent 60%);
+}
+.brand{position:relative;z-index:1}
+.brand-icon{
+  width:56px;height:56px;background:var(--gold);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;margin-bottom:1.2rem;
+  box-shadow:0 8px 32px rgba(201,146,42,.35);
+}
+.brand h1{font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;color:#fff;line-height:1.1}
+.brand h1 span{color:var(--gold)}
+.brand p{color:rgba(255,255,255,.45);font-size:.9rem;margin-top:.5rem;font-weight:300}
+
+.features{position:relative;z-index:1}
+.feature{display:flex;gap:.9rem;align-items:flex-start;margin-bottom:1.4rem}
+.feat-icon{
+  width:40px;height:40px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+}
+.feat-text strong{display:block;color:#fff;font-size:.88rem;font-weight:500}
+.feat-text span{color:rgba(255,255,255,.4);font-size:.8rem}
+
+.left-footer{position:relative;z-index:1;color:rgba(255,255,255,.25);font-size:.75rem}
+
+/* Decoración geométrica */
+.geo{position:absolute;right:-60px;top:50%;transform:translateY(-50%);width:300px;height:300px;border-radius:50%;
+  border:1px solid rgba(201,146,42,.15);z-index:0}
+.geo2{position:absolute;right:-120px;top:50%;transform:translateY(-50%);width:480px;height:480px;border-radius:50%;
+  border:1px solid rgba(201,146,42,.07);z-index:0}
+.geo3{position:absolute;right:40px;bottom:60px;width:120px;height:120px;border-radius:24px;
+  border:1px solid rgba(255,255,255,.06);z-index:0;transform:rotate(20deg)}
+
+/* ── PANEL DERECHO ── */
+.right{
+  background:var(--paper);
+  display:flex;align-items:center;justify-content:center;
+  padding:2rem;
+}
+.form-box{width:100%;max-width:400px}
+
+.form-box .heading{
+  font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;
+  color:var(--ink);margin-bottom:.3rem;
+}
+.form-box .sub{color:#6B7280;font-size:.88rem;margin-bottom:2rem}
+
+.field{margin-bottom:1.2rem}
+.field label{
+  display:block;font-size:.78rem;font-weight:500;
+  color:#374151;margin-bottom:.45rem;letter-spacing:.03em;text-transform:uppercase;
+}
+.field input{
+  width:100%;padding:.75rem 1rem;border:1.5px solid var(--mist);
+  border-radius:10px;font-size:.95rem;font-family:'DM Sans',sans-serif;
+  color:var(--ink);background:#fff;transition:border .2s,box-shadow .2s;
+}
+.field input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,146,42,.12)}
+.field input::placeholder{color:#CBD5E1}
+
+.btn-login{
+  width:100%;padding:.85rem;border:none;border-radius:10px;
+  background:var(--ink);color:#fff;
+  font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;
+  cursor:pointer;transition:all .2s;letter-spacing:.03em;margin-top:.4rem;
+  position:relative;overflow:hidden;
+}
+.btn-login::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(201,146,42,.15),transparent);
+  transform:translateX(-100%);transition:transform .4s;
+}
+.btn-login:hover{background:var(--slate);transform:translateY(-1px);box-shadow:0 8px 24px rgba(10,15,30,.2)}
+.btn-login:hover::after{transform:translateX(100%)}
+
+.divider{display:flex;align-items:center;gap:.8rem;margin:1.4rem 0}
+.divider hr{flex:1;border:none;border-top:1px solid var(--mist)}
+.divider span{color:#9CA3AF;font-size:.78rem}
+
+.link-row{text-align:center;font-size:.85rem;color:#6B7280}
+.link-row a{color:var(--gold);font-weight:500;text-decoration:none}
+.link-row a:hover{text-decoration:underline}
+
+.error-box{
+  background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;
+  padding:.75rem 1rem;font-size:.85rem;color:#DC2626;
+  display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;
+}
+
+@media(max-width:680px){
+  body{grid-template-columns:1fr}
+  .left{display:none}
+  .right{padding:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- IZQUIERDA -->
+<div class="left">
+  <div class="geo"></div><div class="geo2"></div><div class="geo3"></div>
+
+  <div class="brand">
+    <div class="brand-icon">🅿</div>
+    <h1>Neo<span>Park</span><br>ECCI</h1>
+    <p>Sistema de Gestión Digital · Sede Centro</p>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-text">
+        <strong>Tiempo real</strong>
+        <span>Disponibilidad de cupos actualizada al instante</span>
+      </div>
+    </div>
+    <div class="feature">
+      <div class="feat-icon">🔐</div>
+      <div class="feat-text">
+        <strong>Acceso seguro por roles</strong>
+        <span>Administrador · Operario · Usuario</span>
+      </div>
+    </div>
+    <div class="feature">
+      <div class="feat-icon">📊</div>
+      <div class="feat-text">
+        <strong>Reportes y recaudo</strong>
+        <span>Análisis diario, semanal y mensual</span>
+      </div>
+    </div>
+    <div class="feature">
+      <div class="feat-icon">🧾</div>
+      <div class="feat-text">
+        <strong>Ticket automático</strong>
+        <span>Cobro calculado por tiempo de permanencia</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="left-footer">Universidad ECCI · Gestión Bases de Datos · Grupo 6 BNL · 2026</div>
+</div>
+
+<!-- DERECHA -->
+<div class="right">
+  <div class="form-box">
+    <h2 class="heading">Bienvenido</h2>
+    <p class="sub">Ingresa con tu correo institucional para continuar</p>
+
+    {% if error %}
+    <div class="error-box">⚠ {{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      <div class="field">
+        <label>Correo institucional</label>
+        <input type="email" name="correo" placeholder="usuario@ecci.edu.co" required autofocus>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" name="contrasena" placeholder="••••••••" required>
+      </div>
+      <button class="btn-login" type="submit">Ingresar →</button>
+    </form>
+
+    <div class="divider"><hr><span>¿Primera vez?</span><hr></div>
+    <div class="link-row">
+      ¿No tienes cuenta? <a href="{{ url_for('registro') }}">Crear cuenta nueva</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Reportes — NeoPark{% endblock %}
+{% block page_title %}Reportes{% endblock %}
+{% block breadcrumb %}Administración / Reportes{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-hdr">
+    <h3>📅 Período de análisis</h3>
+    <a href="{{ url_for('exportar_csv', periodo=periodo) }}" class="btn btn-success btn-sm">⬇ Exportar CSV</a>
+  </div>
+  <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center">
+    <a href="?periodo=dia"    class="btn {% if periodo=='dia'    %}btn-primary{% else %}btn-ghost{% endif %}">Hoy</a>
+    <a href="?periodo=semana" class="btn {% if periodo=='semana' %}btn-primary{% else %}btn-ghost{% endif %}">Últimos 7 días</a>
+    <a href="?periodo=mes"    class="btn {% if periodo=='mes'    %}btn-primary{% else %}btn-ghost{% endif %}">Últimos 30 días</a>
+  </div>
+</div>
+
+<div class="stats-grid">
+  {% for r in recaudo %}
+  <div class="stat dorado">
+    <div class="num">${{ "{:,.0f}".format(r.recaudo_total or 0) }}</div>
+    <div class="lbl">{{ r.nombre_tipo }} · {{ r.total_registros }} registros</div>
+  </div>
+  {% else %}
+  <div class="card"><p style="color:#94a3b8;padding:1rem">Sin registros para el período.</p></div>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <div class="card-hdr"><h3>🔍 Buscar por placa</h3></div>
+  <form method="get" style="display:flex;gap:.6rem;align-items:flex-end;flex-wrap:wrap">
+    <input type="hidden" name="periodo" value="{{ periodo }}">
+    <div class="form-group" style="margin:0;flex:1;max-width:280px">
+      <input name="placa" placeholder="Ej: ABC123" value="{{ busqueda_placa }}">
+    </div>
+    <button class="btn btn-primary" type="submit">Buscar</button>
+    {% if busqueda_placa %}<a href="?periodo={{ periodo }}" class="btn btn-ghost">Limpiar</a>{% endif %}
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-hdr">
+    <h3>📋 Historial de registros</h3>
+    <span style="font-size:.8rem;color:#94a3b8">{{ historial|length }} registros</span>
+  </div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>#</th><th>Placa</th><th>Tipo</th><th>Espacio</th><th>Entrada</th><th>Salida</th><th>Valor</th><th>Estado</th></tr></thead>
+    <tbody>
+      {% for r in historial %}
+      <tr>
+        <td style="color:#94a3b8">{{ r.id_registro }}</td>
+        <td><strong>{{ r.placa }}</strong></td>
+        <td>{{ r.nombre_tipo }}</td>
+        <td>{{ r.espacio }}</td>
+        <td>{{ r.fecha_entrada }} {{ r.hora_entrada[:5] }}</td>
+        <td>{{ (r.fecha_salida+' '+r.hora_salida[:5]) if r.fecha_salida else '—' }}</td>
+        <td style="font-weight:700;color:{% if r.valor_pagado %}#059669{% else %}#94a3b8{% endif %}">
+          {{ ('$'+"{:,.0f}".format(r.valor_pagado)) if r.valor_pagado else '—' }}
+        </td>
+        <td><span class="badge b-{{ r.estado.lower() }}">{{ r.estado }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

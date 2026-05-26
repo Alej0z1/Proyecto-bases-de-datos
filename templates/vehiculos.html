@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Vehículos — NeoPark{% endblock %}
+{% block page_title %}Vehículos{% endblock %}
+{% block breadcrumb %}Mis datos / Vehículos{% endblock %}
+{% block content %}
+
+<div class="card">
+  <div class="card-hdr"><h3>+ Registrar nuevo vehículo</h3></div>
+  <form method="post">
+    <div class="form-row">
+      <div class="form-group"><label>Placa *</label><input name="placa" placeholder="ABC123" required style="text-transform:uppercase"></div>
+      <div class="form-group"><label>Tipo *</label>
+        <select name="id_tipo" required>
+          {% for t in tipos %}<option value="{{ t.id_tipo }}">{{ t.nombre_tipo }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Marca</label><input name="marca" placeholder="Chevrolet, Honda..."></div>
+      <div class="form-group"><label>Color</label><input name="color" placeholder="Blanco, Rojo..."></div>
+    </div>
+    {% if session.rol in ['Administrador','Operario'] %}
+    <div class="form-group"><label>Propietario</label>
+      <select name="id_usuario">
+        {% for u in usuarios %}<option value="{{ u.id_usuario }}">{{ u.nombre }}</option>{% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    <button class="btn btn-gold" type="submit">Registrar vehículo</button>
+  </form>
+</div>
+
+{% if busqueda is defined and session.rol in ['Administrador','Operario'] %}
+<div class="card" style="margin-bottom:.8rem">
+  <form method="get" style="display:flex;gap:.6rem;align-items:flex-end">
+    <div class="form-group" style="margin:0;flex:1;max-width:300px">
+      <label>Buscar por placa o propietario</label>
+      <input name="q" value="{{ busqueda }}" placeholder="ABC123 o nombre...">
+    </div>
+    <button class="btn btn-ghost" type="submit">Buscar</button>
+    {% if busqueda %}<a href="{{ url_for('vehiculos') }}" class="btn btn-ghost">Limpiar</a>{% endif %}
+  </form>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-hdr">
+    <h3>Lista de vehículos</h3>
+    <span style="font-size:.78rem;color:var(--muted)">{{ vehiculos|length }} registrados</span>
+  </div>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>Placa</th><th>Tipo</th><th>Marca</th><th>Color</th><th>Propietario</th><th>Acciones</th></tr></thead>
+    <tbody>
+      {% for v in vehiculos %}
+      <tr>
+        <td><strong>{{ v.placa }}</strong></td>
+        <td>{{ v.nombre_tipo }}</td>
+        <td>{{ v.marca or '—' }}</td>
+        <td>{{ v.color or '—' }}</td>
+        <td>{{ v.propietario }}</td>
+        <td>
+          <div style="display:flex;gap:.4rem">
+            <a href="{{ url_for('editar_vehiculo', placa=v.placa) }}" class="btn btn-ghost btn-sm">✏ Editar</a>
+            <form method="post" action="{{ url_for('eliminar_vehiculo', placa=v.placa) }}" style="display:inline"
+                  onsubmit="return confirm('¿Eliminar vehículo {{ v.placa }}? Esta acción no se puede deshacer.')">
+              <button class="btn btn-danger btn-sm" type="submit">✕</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Sin vehículos registrados</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}NeoPark ECCI{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --ink:#0A0F1E;--ink2:#1E2A3A;--paper:#F7F5F0;--mist:#E8E4DD;
+  --gold:#C9922A;--gold-lt:#F5C96A;--gold-dim:rgba(201,146,42,.15);
+  --blue:#2563EB;--green:#059669;--red:#DC2626;--orange:#EA580C;
+  --text:#1F2937;--muted:#6B7280;--border:#E5E7EB;
+  --sidebar:240px;--topbar:60px;
+  --radius:12px;--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--text);
+     display:flex;min-height:100vh;font-size:15px}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:var(--sidebar);background:var(--ink);min-height:100vh;
+  position:fixed;top:0;left:0;display:flex;flex-direction:column;z-index:200;
+  border-right:1px solid rgba(255,255,255,.04);
+}
+.sb-brand{
+  padding:1.4rem 1.2rem 1rem;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.sb-logo{
+  display:flex;align-items:center;gap:.7rem;
+}
+.sb-logo .icon{
+  width:36px;height:36px;background:var(--gold);border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
+  box-shadow:0 4px 12px rgba(201,146,42,.3);flex-shrink:0;
+}
+.sb-logo h2{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#fff}
+.sb-logo h2 span{color:var(--gold)}
+.sb-subtitle{font-size:.68rem;color:rgba(255,255,255,.3);margin-top:.15rem;padding-left:44px;font-weight:300}
+
+.sb-nav{flex:1;padding:.6rem 0;overflow-y:auto}
+.sb-section{
+  padding:.5rem 1.2rem .2rem;
+  font-size:.62rem;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:rgba(255,255,255,.25);
+}
+.sb-link{
+  display:flex;align-items:center;gap:.65rem;
+  padding:.6rem 1.2rem;color:rgba(255,255,255,.55);
+  text-decoration:none;font-size:.84rem;font-weight:400;
+  transition:all .15s;border-left:2px solid transparent;
+  position:relative;
+}
+.sb-link .lk-icon{font-size:.95rem;width:18px;text-align:center;flex-shrink:0}
+.sb-link:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.05);border-left-color:rgba(201,146,42,.4)}
+.sb-link.active{color:#fff;background:rgba(201,146,42,.1);border-left-color:var(--gold);font-weight:500}
+.sb-link.active .lk-icon{filter:drop-shadow(0 0 4px rgba(201,146,42,.6))}
+
+.sb-footer{
+  padding:1rem 1.2rem;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.sb-user{margin-bottom:.7rem}
+.sb-user .name{font-size:.85rem;font-weight:500;color:#fff}
+.sb-user .role-badge{
+  display:inline-block;padding:.15rem .55rem;border-radius:99px;
+  font-size:.65rem;font-weight:700;letter-spacing:.04em;margin-top:.25rem;
+}
+.role-administrador{background:rgba(201,146,42,.2);color:var(--gold-lt);border:1px solid rgba(201,146,42,.3)}
+.role-operario{background:rgba(37,99,235,.2);color:#93C5FD;border:1px solid rgba(37,99,235,.3)}
+.role-usuario{background:rgba(5,150,105,.2);color:#6EE7B7;border:1px solid rgba(5,150,105,.3)}
+
+.btn-logout{
+  display:flex;align-items:center;gap:.5rem;width:100%;
+  padding:.55rem .8rem;border-radius:8px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);
+  font-size:.8rem;font-family:'DM Sans',sans-serif;cursor:pointer;
+  text-decoration:none;transition:all .2s;
+}
+.btn-logout:hover{background:rgba(220,38,38,.15);border-color:rgba(220,38,38,.3);color:#FCA5A5}
+.btn-logout.admin{background:rgba(201,146,42,.1);border-color:rgba(201,146,42,.25);color:#F5C96A}
+.btn-logout.admin:hover{background:rgba(201,146,42,.2);color:#fff}
+
+/* ══ MAIN ══ */
+.main-wrap{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+.topbar{
+  height:var(--topbar);background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 1.8rem;position:sticky;top:0;z-index:100;
+}
+.topbar-left{display:flex;align-items:center;gap:.5rem}
+.topbar-left .page-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--ink)}
+.topbar-left .sep{color:var(--border);font-size:1.2rem}
+.topbar-left .breadcrumb{font-size:.8rem;color:var(--muted)}
+.topbar-right{display:flex;align-items:center;gap:.8rem}
+.topbar-logout{
+  display:flex;align-items:center;gap:.4rem;padding:.4rem .9rem;
+  border-radius:8px;font-size:.8rem;font-weight:500;cursor:pointer;
+  text-decoration:none;transition:all .15s;border:1px solid var(--border);
+  color:var(--muted);background:#fff;
+}
+.topbar-logout:hover{background:#FEF2F2;border-color:#FECACA;color:var(--red)}
+.topbar-logout.admin{border-color:rgba(201,146,42,.3);color:var(--gold);background:rgba(201,146,42,.05)}
+.topbar-logout.admin:hover{background:rgba(201,146,42,.12);color:#92400E}
+
+.content{padding:1.6rem 1.8rem;flex:1}
+
+/* ══ CARDS ══ */
+.card{background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:1.4rem;margin-bottom:1.1rem}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;padding-bottom:.8rem;border-bottom:1px solid #F9FAFB}
+.card-hdr h3{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;color:var(--ink)}
+
+/* ══ STATS ══ */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem;margin-bottom:1.1rem}
+.stat-card{
+  background:#fff;border-radius:var(--radius);border:1px solid var(--border);
+  padding:1.1rem 1.2rem;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;
+}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)}
+.stat-card.green::before{background:var(--green)}
+.stat-card.red::before{background:var(--red)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.orange::before{background:var(--orange)}
+.stat-card .s-icon{font-size:1.3rem;margin-bottom:.4rem;opacity:.7}
+.stat-card .s-num{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:var(--ink);line-height:1}
+.stat-card .s-lbl{font-size:.72rem;color:var(--muted);margin-top:.3rem;text-transform:uppercase;letter-spacing:.05em;font-weight:500}
+
+/* ══ TABLAS ══ */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+thead th{
+  padding:.6rem 1rem;text-align:left;
+  font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);border-bottom:2px solid var(--border);background:#FAFAFA;
+}
+tbody td{padding:.65rem 1rem;border-bottom:1px solid #F9FAFB;color:var(--text)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#FAFBFC}
+
+/* ══ BADGES ══ */
+.badge{display:inline-block;padding:.18rem .6rem;border-radius:99px;font-size:.72rem;font-weight:600}
+.b-administrador,.b-admin{background:#FEF9C3;color:#854D0E;border:1px solid #FDE68A}
+.b-operario{background:#DBEAFE;color:#1E40AF;border:1px solid #BFDBFE}
+.b-usuario{background:#D1FAE5;color:#065F46;border:1px solid #A7F3D0}
+.b-abierto{background:#DBEAFE;color:#1E40AF;border:1px solid #BFDBFE}
+.b-cerrado{background:#F3F4F6;color:#374151;border:1px solid #E5E7EB}
+.b-libre{background:#D1FAE5;color:#065F46;border:1px solid #A7F3D0}
+.b-ocupado{background:#FEE2E2;color:#991B1B;border:1px solid #FECACA}
+
+/* ══ FORMS ══ */
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.75rem;font-weight:600;color:#374151;margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.04em}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;padding:.62rem .9rem;border:1.5px solid var(--border);
+  border-radius:9px;font-size:.88rem;font-family:'DM Sans',sans-serif;
+  color:var(--text);background:#fff;transition:border .15s,box-shadow .15s;
+}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,146,42,.1)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+/* ══ BUTTONS ══ */
+.btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.52rem 1.1rem;border:none;border-radius:9px;cursor:pointer;
+  font-size:.84rem;font-weight:500;font-family:'DM Sans',sans-serif;
+  text-decoration:none;transition:all .15s;white-space:nowrap;
+}
+.btn-primary{background:var(--ink);color:#fff}.btn-primary:hover{background:var(--ink2)}
+.btn-gold{background:var(--gold);color:#fff;box-shadow:0 2px 8px rgba(201,146,42,.3)}
+.btn-gold:hover{background:#B8821F;box-shadow:0 4px 12px rgba(201,146,42,.4)}
+.btn-success{background:var(--green);color:#fff}.btn-success:hover{background:#047857}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:#B91C1C}
+.btn-warning{background:var(--orange);color:#fff}.btn-warning:hover{background:#C2410C}
+.btn-ghost{background:#F9FAFB;color:#374151;border:1px solid var(--border)}.btn-ghost:hover{background:#F3F4F6}
+.btn-sm{padding:.32rem .75rem;font-size:.77rem}
+
+/* ══ ALERTS ══ */
+.alert{display:flex;align-items:center;gap:.6rem;padding:.8rem 1rem;border-radius:9px;font-size:.86rem;margin-bottom:.9rem;border-left:4px solid}
+.alert-success{background:#F0FDF4;color:#166534;border-color:var(--green)}
+.alert-danger{background:#FEF2F2;color:#991B1B;border-color:var(--red)}
+.alert-warning{background:#FFFBEB;color:#92400E;border-color:#F59E0B}
+
+/* ══ ESPACIOS ══ */
+.esp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:.6rem}
+.esp-cell{
+  border-radius:10px;padding:.75rem .4rem;text-align:center;
+  font-size:.73rem;font-weight:600;border:1.5px solid;
+  transition:transform .15s;cursor:default;
+}
+.esp-cell:hover{transform:scale(1.04)}
+.esp-cell.libre{background:#F0FDF4;border-color:#A7F3D0;color:#065F46}
+.esp-cell.ocupado{background:#FEF2F2;border-color:#FECACA;color:#991B1B}
+.esp-cell .cod{font-size:.9rem;font-weight:800;margin-bottom:.15rem}
+
+/* ══ TICKET ══ */
+.ticket{
+  background:#fff;border:1.5px solid var(--border);border-radius:16px;
+  padding:1.6rem;max-width:400px;margin:0 auto 1.1rem;text-align:center;
+  box-shadow:var(--shadow);
+}
+.ticket .t-placa{
+  font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:900;
+  color:var(--ink);letter-spacing:.12em;margin:1rem 0;
+}
+.ticket .t-row{display:flex;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid #F9FAFB;font-size:.85rem}
+.ticket .t-row .lbl{color:var(--muted)}
+.ticket .t-row .val{font-weight:600}
+.ticket .t-total{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:900;color:var(--green);margin-top:1rem}
+
+/* ══ CHARTS ══ */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.1rem}
+.chart-box{background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:1.2rem}
+.chart-box h3{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;color:var(--ink);margin-bottom:1rem}
+
+/* ══ TIEMPO BADGE ══ */
+.t-badge{display:inline-block;padding:.15rem .55rem;border-radius:99px;font-size:.73rem;font-weight:600}
+.t-ok{background:#D1FAE5;color:#065F46}.t-warn{background:#FEF9C3;color:#854D0E}.t-alert{background:#FEE2E2;color:#991B1B}
+</style>
+</head>
+<body>
+{% if session.get('user_id') %}
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">
+      <div class="icon">🅿</div>
+      <h2>Neo<span>Park</span></h2>
+    </div>
+    <div class="sb-subtitle">Universidad ECCI · Sede Centro</div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section">General</div>
+    <a href="{{ url_for('dashboard') }}" class="sb-link {% if request.endpoint=='dashboard' %}active{% endif %}">
+      <span class="lk-icon">◼</span>Dashboard
+    </a>
+    <a href="{{ url_for('espacios') }}" class="sb-link {% if request.endpoint=='espacios' %}active{% endif %}">
+      <span class="lk-icon">🅿</span>Espacios
+    </a>
+
+    {% if session.rol in ['Administrador','Operario'] %}
+    <div class="sb-section">Operaciones</div>
+    <a href="{{ url_for('checkin') }}" class="sb-link {% if request.endpoint=='checkin' %}active{% endif %}">
+      <span class="lk-icon">↓</span>Check-In
+    </a>
+    <a href="{{ url_for('checkout') }}" class="sb-link {% if request.endpoint=='checkout' %}active{% endif %}">
+      <span class="lk-icon">↑</span>Check-Out
+    </a>
+    {% endif %}
+
+    <div class="sb-section">Mis datos</div>
+    <a href="{{ url_for('vehiculos') }}" class="sb-link {% if request.endpoint=='vehiculos' %}active{% endif %}">
+      <span class="lk-icon">🚗</span>Vehículos
+    </a>
+    <a href="{{ url_for('historial') }}" class="sb-link {% if request.endpoint=='historial' %}active{% endif %}">
+      <span class="lk-icon">🕐</span>Mi Historial
+    </a>
+    <a href="{{ url_for('perfil') }}" class="sb-link {% if request.endpoint=='perfil' %}active{% endif %}">
+      <span class="lk-icon">👤</span>Mi Perfil
+    </a>
+
+    {% if session.rol == 'Administrador' %}
+    <div class="sb-section">Administración</div>
+    <a href="{{ url_for('reportes') }}" class="sb-link {% if request.endpoint=='reportes' %}active{% endif %}">
+      <span class="lk-icon">📈</span>Reportes
+    </a>
+    <a href="{{ url_for('tarifas') }}" class="sb-link {% if request.endpoint=='tarifas' %}active{% endif %}">
+      <span class="lk-icon">💰</span>Tarifas
+    </a>
+    <a href="{{ url_for('usuarios') }}" class="sb-link {% if request.endpoint=='usuarios' %}active{% endif %}">
+      <span class="lk-icon">👥</span>Usuarios
+    </a>
+    <a href="{{ url_for('auditoria') }}" class="sb-link {% if request.endpoint=='auditoria' %}active{% endif %}">
+      <span class="lk-icon">🔒</span>Auditoría
+    </a>
+    {% endif %}
+  </nav>
+
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="name">{{ session.nombre }}</div>
+      <span class="role-badge role-{{ session.rol.lower() }}">{{ session.rol }}</span>
+    </div>
+    <a href="{{ url_for('logout') }}"
+       class="btn-logout {% if session.rol=='Administrador' %}admin{% endif %}"
+       onclick="return confirm('¿Cerrar sesión?')">
+      <span>⬡</span>
+      {% if session.rol == 'Administrador' %}Salir (Admin){% else %}Cerrar sesión{% endif %}
+    </a>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="page-title">{% block page_title %}NeoPark{% endblock %}</span>
+      <span class="sep">/</span>
+      <span class="breadcrumb">{% block breadcrumb %}{% endblock %}</span>
+    </div>
+    <div class="topbar-right">
+      <a href="{{ url_for('logout') }}"
+         class="topbar-logout {% if session.rol=='Administrador' %}admin{% endif %}"
+         onclick="return confirm('¿Cerrar sesión?')">
+        {% if session.rol == 'Administrador' %}🔐 Salir (Admin){% else %}⬡ Salir{% endif %}
+      </a>
+    </div>
+  </div>
+
+  <div class="content">
+    {% for cat in ['success','danger','warning'] %}
+      {% for msg in get_flashed_messages(category_filter=[cat]) %}
+      <div class="alert alert-{{ cat }}">
+        {% if cat=='success' %}✓{% elif cat=='danger' %}✗{% else %}⚠{% endif %} {{ msg }}
+      </div>
+      {% endfor %}
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </div>
+</div>
+{% else %}
+<div class="content" style="margin:0;width:100%">{% block content_noauth %}{% endblock %}</div>
+{% endif %}
+</body>
+</html>

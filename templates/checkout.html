@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Check-Out — NeoPark{% endblock %}
+{% block page_title %}Check-Out{% endblock %}
+{% block breadcrumb %}Operaciones / Registro de Salida{% endblock %}
+{% block content %}
+
+{% if ticket %}
+<div class="ticket">
+  <div class="ticket-logo">🅿</div>
+  <h3>NeoPark ECCI — Recibo de Salida</h3>
+  <p style="color:#94a3b8;font-size:.8rem">Parqueadero Sede Centro</p>
+  <div class="ticket-placa">{{ ticket.placa }}</div>
+  <div class="ticket-row"><span class="label">Tipo</span><span class="value">{{ ticket.tipo }}</span></div>
+  <div class="ticket-row"><span class="label">Espacio</span><span class="value">{{ ticket.espacio }}</span></div>
+  <div class="ticket-row"><span class="label">Propietario</span><span class="value">{{ ticket.propietario }}</span></div>
+  <div class="ticket-row"><span class="label">Entrada</span><span class="value">{{ ticket.entrada }}</span></div>
+  <div class="ticket-row"><span class="label">Salida</span><span class="value">{{ ticket.salida }}</span></div>
+  <div class="ticket-row"><span class="label">Permanencia</span><span class="value">{{ ticket.duracion }}</span></div>
+  <div class="ticket-total">${{ "{:,}".format(ticket.valor) }}</div>
+  <p style="color:#94a3b8;font-size:.75rem;margin-top:.8rem">Registro #{{ ticket.id_registro }} — Gracias por usar NeoPark ECCI</p>
+  <button onclick="window.print()" class="btn btn-ghost btn-sm" style="margin-top:.8rem">🖨 Imprimir recibo</button>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-hdr"><h3>↑ Vehículos dentro del parqueadero</h3><span style="font-size:.8rem;color:#94a3b8">{{ registros|length }} activos</span></div>
+  {% if registros %}
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>#</th><th>Placa</th><th>Tipo</th><th>Espacio</th><th>Entrada</th><th>Tiempo</th><th>Propietario</th><th>Acción</th></tr></thead>
+    <tbody>
+      {% for r in registros %}
+      {% set horas = r.horas|float %}
+      <tr>
+        <td style="color:#94a3b8">{{ r.id_registro }}</td>
+        <td><strong>{{ r.placa }}</strong></td>
+        <td>{{ r.nombre_tipo }}</td>
+        <td><span class="badge b-ocupado">{{ r.espacio }}</span></td>
+        <td>{{ r.fecha_entrada }} {{ r.hora_entrada[:5] }}</td>
+        <td>
+          <span class="t-badge {% if horas < 2 %}t-ok{% elif horas < 6 %}t-warn{% else %}t-alert{% endif %}">
+            {{ "%.1f"|format(horas) }}h
+          </span>
+        </td>
+        <td>{{ r.propietario }}</td>
+        <td>
+          <form method="post" style="display:inline" onsubmit="return confirm('¿Confirmar salida de {{ r.placa }}?')">
+            <input type="hidden" name="id_registro" value="{{ r.id_registro }}">
+            <button class="btn btn-warning btn-sm" type="submit">↑ Check-Out</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p style="text-align:center;color:#94a3b8;padding:2rem">No hay vehículos activos en este momento.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — NeoPark{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Inicio{% endblock %}
+{% block content %}
+
+{# ══ ADMIN / OPERARIO ══ #}
+{% if session.rol in ['Administrador','Operario'] %}
+<div class="stats-grid">
+  <div class="stat-card"><div class="s-icon">🅿</div><div class="s-num">{{ total }}</div><div class="s-lbl">Total espacios</div></div>
+  <div class="stat-card green"><div class="s-icon">✓</div><div class="s-num">{{ libres }}</div><div class="s-lbl">Libres</div></div>
+  <div class="stat-card red"><div class="s-icon">🚗</div><div class="s-num">{{ ocupados }}</div><div class="s-lbl">Ocupados</div></div>
+  <div class="stat-card" style="--c:var(--gold)"><div class="s-icon">💰</div><div class="s-num">${{ "{:,.0f}".format(recaudo_hoy) }}</div><div class="s-lbl">Recaudo hoy</div></div>
+  <div class="stat-card orange"><div class="s-icon">📋</div><div class="s-num">{{ total_hist }}</div><div class="s-lbl">Registros totales</div></div>
+</div>
+
+<div class="charts-grid">
+  <div class="chart-box"><h3>Ocupación por tipo</h3><canvas id="chartDona" height="200"></canvas></div>
+  <div class="chart-box"><h3>Recaudo últimos 7 días</h3><canvas id="chartLinea" height="200"></canvas></div>
+</div>
+
+<div class="card">
+  <div class="card-hdr">
+    <h3>⚡ Acciones rápidas</h3>
+  </div>
+  <div style="display:flex;gap:.7rem;flex-wrap:wrap">
+    <a href="{{ url_for('espacios') }}" class="btn btn-ghost">🅿 Espacios</a>
+    <a href="{{ url_for('checkin') }}" class="btn btn-success">↓ Check-In</a>
+    <a href="{{ url_for('checkout') }}" class="btn btn-warning">↑ Check-Out</a>
+    <a href="{{ url_for('vehiculos') }}" class="btn btn-primary">🚗 Vehículos</a>
+    {% if session.rol == 'Administrador' %}
+    <a href="{{ url_for('reportes') }}" class="btn btn-primary">📈 Reportes</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-hdr"><h3>🕐 Últimas actividades</h3></div>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>#</th><th>Placa</th><th>Tipo</th><th>Espacio</th><th>Entrada</th><th>Estado</th><th>Propietario</th></tr></thead>
+    <tbody>
+      {% for r in recientes %}
+      <tr>
+        <td style="color:var(--muted)">{{ r.id_registro }}</td>
+        <td><strong>{{ r.placa }}</strong></td>
+        <td>{{ r.nombre_tipo }}</td>
+        <td><span class="badge b-libre">{{ r.espacio }}</span></td>
+        <td>{{ r.fecha_entrada }} {{ r.hora_entrada[:5] }}</td>
+        <td><span class="badge b-{{ r.estado.lower() }}">{{ r.estado }}</span></td>
+        <td>{{ r.propietario }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:1.5rem">Sin actividad reciente</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+{# ══ USUARIO FINAL ══ #}
+{% else %}
+
+{# ── Notificación si acaba de salir ── #}
+{% if recien_salio %}
+<div style="background:linear-gradient(135deg,#059669,#047857);border-radius:14px;padding:1.4rem 1.6rem;margin-bottom:1.2rem;color:#fff;display:flex;align-items:center;gap:1.2rem;box-shadow:0 4px 20px rgba(5,150,105,.3)">
+  <div style="font-size:2.8rem">✅</div>
+  <div>
+    <div style="font-weight:700;font-size:1.05rem;font-family:'Syne',sans-serif">¡Salida registrada exitosamente!</div>
+    <div style="font-size:.88rem;opacity:.85;margin-top:.25rem">
+      Tu vehículo <strong>{{ recien_salio.placa }}</strong> salió del espacio
+      <strong>{{ recien_salio.espacio }}</strong> ·
+      Permanencia: <strong>{{ recien_salio.duracion }}</strong> ·
+      Valor cobrado: <strong>${{ "{:,}".format(recien_salio.valor) }}</strong>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{# ── Vehículo activo ── #}
+{% if vehiculo_activo %}
+<div style="background:linear-gradient(135deg,var(--ink),var(--ink2));border-radius:14px;padding:1.5rem;margin-bottom:1.2rem;color:#fff;position:relative;overflow:hidden">
+  <div style="position:absolute;right:-30px;top:-30px;width:160px;height:160px;border-radius:50%;background:rgba(201,146,42,.08);border:1px solid rgba(201,146,42,.15)"></div>
+  <div style="position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:5rem;opacity:.06">🚗</div>
+  <div style="position:relative;z-index:1">
+    <div style="font-size:.72rem;color:#93C5FD;text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:.3rem">Vehículo dentro del parqueadero</div>
+    <div style="font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:900;letter-spacing:.1em">{{ vehiculo_activo.placa }}</div>
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:.7rem;font-size:.87rem;color:#BFDBFE">
+      <span>🅿 Espacio <strong style="color:#fff">{{ vehiculo_activo.espacio }}</strong></span>
+      <span>🕐 Ingresó <strong style="color:#fff">{{ vehiculo_activo.hora_entrada[:5] }}</strong></span>
+      <span>⏱ <strong style="color:#FCD34D">
+        {% set h = (vehiculo_activo.minutos // 60) %}
+        {% set m = (vehiculo_activo.minutos % 60) %}
+        {{ h }}h {{ m }}min adentro
+      </strong></span>
+      <span>🚗 <strong style="color:#fff">{{ vehiculo_activo.nombre_tipo }}</strong></span>
+    </div>
+  </div>
+</div>
+{% else %}
+{% if not recien_salio %}
+<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:1rem 1.4rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:.8rem">
+  <span style="font-size:1.4rem">✓</span>
+  <div>
+    <strong style="color:#166534">Sin vehículo activo</strong>
+    <p style="color:#4ADE80;font-size:.83rem;margin:0">No tienes ningún vehículo dentro del parqueadero ahora mismo.</p>
+  </div>
+</div>
+{% endif %}
+{% endif %}
+
+{# ── Stats personales + cuadrícula ── #}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.1rem">
+
+  <div>
+    <div class="stats-grid" style="grid-template-columns:1fr 1fr;margin-bottom:1rem">
+      <div class="stat-card green"><div class="s-icon">🅿</div><div class="s-num">{{ libres }}</div><div class="s-lbl">Libres ahora</div></div>
+      <div class="stat-card"><div class="s-icon">🚗</div><div class="s-num">{{ mis_vehiculos|length }}</div><div class="s-lbl">Mis vehículos</div></div>
+      <div class="stat-card"><div class="s-icon">📋</div><div class="s-num">{{ mis_registros }}</div><div class="s-lbl">Mis visitas</div></div>
+      <div class="stat-card orange"><div class="s-icon">💰</div><div class="s-num">${{ "{:,.0f}".format(mi_gasto) }}</div><div class="s-lbl">Total pagado</div></div>
+    </div>
+
+    <div class="card" style="margin:0">
+      <div class="card-hdr">
+        <h3>🚗 Mis vehículos</h3>
+        <a href="{{ url_for('vehiculos') }}" class="btn btn-ghost btn-sm">+ Agregar</a>
+      </div>
+      {% if mis_vehiculos %}
+        {% for v in mis_vehiculos %}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem 0;border-bottom:1px solid #F9FAFB">
+          <div>
+            <strong>{{ v.placa }}</strong>
+            <span style="display:block;font-size:.76rem;color:var(--muted)">{{ v.marca or '' }}{% if v.color %} · {{ v.color }}{% endif %}</span>
+          </div>
+          <span class="badge b-libre">{{ v.nombre_tipo }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--muted);font-size:.85rem;text-align:center;padding:1rem 0">
+          Sin vehículos — <a href="{{ url_for('vehiculos') }}" style="color:var(--gold)">Registrar uno</a>
+        </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card" style="margin:0">
+    <div class="card-hdr"><h3>🅿 Disponibilidad</h3><a href="{{ url_for('espacios') }}" class="btn btn-ghost btn-sm">Ver mapa</a></div>
+    <canvas id="chartDona" height="200"></canvas>
+  </div>
+</div>
+
+{# Acciones #}
+<div class="card">
+  <div class="card-hdr"><h3>⚡ Acciones rápidas</h3></div>
+  <div style="display:flex;gap:.7rem;flex-wrap:wrap">
+    <a href="{{ url_for('espacios') }}" class="btn btn-ghost">🅿 Ver espacios</a>
+    <a href="{{ url_for('vehiculos') }}" class="btn btn-primary">🚗 Vehículos</a>
+    <a href="{{ url_for('historial') }}" class="btn btn-primary">🕐 Historial</a>
+    <a href="{{ url_for('perfil') }}" class="btn btn-ghost">👤 Perfil</a>
+  </div>
+</div>
+
+{# Historial reciente #}
+{% if mis_recientes %}
+<div class="card">
+  <div class="card-hdr"><h3>🕐 Mis últimas visitas</h3><a href="{{ url_for('historial') }}" class="btn btn-ghost btn-sm">Ver todo</a></div>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>Placa</th><th>Tipo</th><th>Espacio</th><th>Entrada</th><th>Salida</th><th>Valor</th><th>Estado</th></tr></thead>
+    <tbody>
+      {% for r in mis_recientes %}
+      <tr>
+        <td><strong>{{ r.placa }}</strong></td>
+        <td>{{ r.nombre_tipo }}</td>
+        <td>{{ r.espacio }}</td>
+        <td>{{ r.fecha_entrada }} {{ r.hora_entrada[:5] }}</td>
+        <td>{{ (r.fecha_salida+' '+r.hora_salida[:5]) if r.fecha_salida else '—' }}</td>
+        <td style="font-weight:700;color:{% if r.valor_pagado %}var(--green){% else %}var(--muted){% endif %}">
+          {{ ('$'+"{:,.0f}".format(r.valor_pagado)) if r.valor_pagado else 'En curso' }}
+        </td>
+        <td><span class="badge b-{{ r.estado.lower() }}">{{ r.estado }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+{% endif %}
+
+<script>
+const dona={{ chart_dona|safe }};
+const colors=['#1a3c6e','#059669','#ea580c','#7c3aed','#0891b2'];
+const ctxD=document.getElementById('chartDona');
+if(ctxD) new Chart(ctxD,{type:'doughnut',data:{labels:dona.labels,datasets:[
+  {label:'Ocupados',data:dona.ocupados,backgroundColor:colors,borderWidth:0},
+  {label:'Libres',data:dona.libres,backgroundColor:colors.map(c=>c+'44'),borderWidth:0}
+]},options:{plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},cutout:'55%',responsive:true}});
+
+{% if session.rol in ['Administrador','Operario'] %}
+const linea={{ chart_linea|safe }};
+new Chart(document.getElementById('chartLinea'),{type:'line',data:{
+  labels:linea.labels.length?linea.labels:['Sin datos'],
+  datasets:[{label:'Recaudo',data:linea.valores.length?linea.valores:[0],
+    borderColor:'#C9922A',backgroundColor:'rgba(201,146,42,.08)',
+    fill:true,tension:0.4,pointBackgroundColor:'#C9922A',pointRadius:4}]
+},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'$'+v.toLocaleString()}}},responsive:true}});
+setInterval(async()=>{const r=await fetch('/api/stats');const d=await r.json();},30000);
+{% endif %}
+</script>
+{% endblock %}
